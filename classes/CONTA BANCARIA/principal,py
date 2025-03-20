@@ -1,0 +1,23 @@
+from contas import ContaBancaria
+
+def menu():
+    print("1. criar conta bancaria\n2. ver saldo\n3. fazer deposito\n4. fazer saque\n5. sair\n")
+    op = int(input("informe a opcao que voce deseja escolher: "))
+
+    match op:
+        case 1:
+            criar_conta()
+        case 2:
+            c1
+def main():
+    c1 = ContaBancaria("roma")
+    c1.ver_saldo()
+    valor = int(input("informe o valor a ser depositado: "))
+    c1.depositar(valor)
+    c1.ver_saldo()
+    saque = (input("informe o valor que voce deseja sacar: "))
+    c1.sacar(saque)
+    c1.ver_saldo()
+
+    if __name__ == "__main__":
+        main()
