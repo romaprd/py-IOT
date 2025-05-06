@@ -38,8 +38,8 @@ while True:
             msg = b"ligar\n"
         elif opcao == "0":
             msg = b"desligar\n"
-        elif opcao.lower() == "ultra":
-            msg = b"ultra\n"
+        elif opcao.lower() == "distancia":
+            msg = b"distancia\n"
         else:
              print("Opção Invalida! Programa Encerrado")
              break
