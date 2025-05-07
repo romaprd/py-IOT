@@ -63,9 +63,7 @@ void loop() {
         long distance = ultrasonic.read();
         Serial.print("Distância em cm: ");
         Serial.println(distance);
-        client.print("Distância: ");
-        client.print(distance);
-        client.println(" cm");
+        client.println(distance);
       }
 
     } else if (cmd == "temperatura") {

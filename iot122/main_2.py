@@ -11,7 +11,6 @@ import time
 # byte mac9[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x0B }; DAVI 192.168.1.178
                                                 
 HOST = ["192.168.1.177",
-        "192.168.1.178",
         "192.168.1.10",
         "192.168.1.11",
         "192.168.1.157",
@@ -24,7 +23,7 @@ HOST = ["192.168.1.177",
         ]
 PORT = 5000
 
-MAX_TENTATIVAS = 30
+MAX_TENTATIVAS = 5
 TIMEOUT = 5
 
 while True:
