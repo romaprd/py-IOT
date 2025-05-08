@@ -1,64 +1,71 @@
 import socket
 import time
-# byte mac1[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x03 }; RAFAEL 192.168.1.10
-# byte mac2[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x04 }; DAYANE 192.168.1.11
-# byte mac3[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x05 }; ERICK 192.168.1.12
-# byte mac4[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x06 }; DIEMERSON 192.168.1.106
-# byte mac5[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x07 }; KAUAN 192.168.1.105
-# byte mac6[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x08 }; RODRIGO 192.168.1.174
-# byte mac7[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x09 }; RIAN 192.168.1.167
-# byte mac8[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x0A }; RAFAEL 192.168.1.157
-# byte mac9[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x0B }; DAVI 192.168.1.178
-                                                
-HOST = ["192.168.1.177",
-        "192.168.1.10",
-        "192.168.1.11",
-        "192.168.1.157",
-        "192.168.1.167",
-        "192.168.1.105",
-        "192.168.1.174",
-        "192.168.1.106",
-        "192.168.1.178",
-        "192.168.1.12"
-        ]
-PORT = 5000
 
+# Lista de IPs dos Arduinos
+HOST = [
+    "192.168.1.177",  # Exemplo adicional
+    "192.168.1.10",   # Rafael
+    "192.168.1.11",   # Dayane
+    "192.168.1.157",  # Rafael
+    "192.168.1.167",  # Rian
+    "192.168.1.105",  # Kauan
+    "192.168.1.174",  # Rodrigo
+    "192.168.1.106",  # Diemerson
+    "192.168.1.178",  # Davi
+    "192.168.1.12"    # Erick
+]
+
+PORT = 5000
 MAX_TENTATIVAS = 5
-TIMEOUT = 5
+TIMEOUT = 5  # segundos
 
 while True:
-        ip = int(input("Escolhe de 1 té 9 para Arduino: "))
-        opcao = input("escolha 0 ou 1 para o LED, ou ultra para ultrassom: ")
-        
-        if ip > 11 :
-             print("Dispositivo Invalido! Programa Encerrado")
-             break
-        elif opcao == "1":
+    try:
+        ip = int(input("Escolha de 1 a 10 para Arduino: "))
+        if ip < 1 or ip > len(HOST):
+            print("Dispositivo inválido! Programa encerrado.")
+            break
+
+        # Novos comandos possíveis
+        opcao = input("Escolha: 0 (desligar), 1 (ligar), ultra, lcd, temperatura: ").strip().lower()
+
+        if opcao == "1":
             msg = b"ligar\n"
         elif opcao == "0":
             msg = b"desligar\n"
-        elif opcao.lower() == "distancia":
+        elif opcao in ("ultra", "distancia"):
             msg = b"distancia\n"
+        elif opcao == "lcd":
+            msg = b"lcd_on\n"  # Envia o comando para ativar o LCD
+        elif opcao == "temperatura":
+            msg = b"temperatura\n"  # Envia o comando para ativar o LCD
+        elif opcao == "sair":
+            print("Encerrando programa.")
+            break
         else:
-             print("Opção Invalida! Programa Encerrado")
-             break
-        
-        s= None
+            print("Opção inválida! Programa encerrado.")
+            break
+
+        s = None
         for tentativa in range(1, MAX_TENTATIVAS + 1):
             try:
-                print(f"Tentando abrir conexão com ip: {HOST[ip-1]}")
-                s = socket.create_connection((HOST[ip-1], PORT), timeout=2)
-                print("Conexão aberta")
+                print(f"Tentando abrir conexão com IP: {HOST[ip - 1]} (tentativa {tentativa})")
+                s = socket.create_connection((HOST[ip - 1], PORT), timeout=2)
+                print("Conexão aberta.")
                 s.settimeout(TIMEOUT)
-                s.sendall(msg) # ou b"ligar\n"
-                print(f"Comando executado: {s.recv(16).decode()}")
+                s.sendall(msg)
+                resposta = s.recv(128).decode().strip()  # aumentamos o buffer
+                print(f"Comando executado. Resposta: {resposta}")
                 break
+
             except socket.timeout:
                 print(f"Tempo esgotado (tentativa {tentativa}/{MAX_TENTATIVAS}).")
             except OSError as e:
-                print(f"Falha de rede ({e}) (tentativa {tentativa}/{MAX_TENTATIVAS}).")
-
+                print(f"Erro de rede: {e} (tentativa {tentativa}/{MAX_TENTATIVAS}).")
             finally:
-                if s: # fecha só se o socket existe
+                if s:
                     s.close()
                     print("Conexão fechada.\n")
+
+    except ValueError:
+        print("Entrada inválida. Use apenas números para o IP.")
