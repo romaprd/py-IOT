@@ -19,44 +19,50 @@ PORT = 5000
 MAX_TENTATIVAS = 5
 TIMEOUT = 5  # segundos
 
+print("Comandos disponíveis:")
+print("0 = desligar\n1 = ligar\nultra ou distancia = sensor ultrassônico\ntemperatura = sensor DHT\nqualquer outro texto = será exibido no LCD\n")
+
 while True:
     try:
-        ip = int(input("Escolha de 1 a 10 para Arduino: "))
-        if ip < 1 or ip > len(HOST):
-            print("Dispositivo inválido! Programa encerrado.")
+        ip = int(input("Escolha de 1 a 10 para Arduino (0 para sair): "))
+        if ip == 0:
+            print("Encerrando programa.")
             break
+        if ip < 1 or ip > len(HOST):
+            print("Dispositivo inválido!")
+            continue
 
-        # Novos comandos possíveis
-        opcao = input("Escolha: 0 (desligar), 1 (ligar), ultra, lcd, temperatura: ").strip().lower()
+        opcao = input("Digite o comando (0, 1, ultra, temperatura, ou texto para LCD): ").strip().lower()
 
+        # Comandos aceitos pelo Arduino
         if opcao == "1":
             msg = b"ligar\n"
         elif opcao == "0":
             msg = b"desligar\n"
         elif opcao in ("ultra", "distancia"):
             msg = b"distancia\n"
-        elif opcao == "lcd":
-            msg = b"lcd_on\n"  # Envia o comando para ativar o LCD
         elif opcao == "temperatura":
-            msg = b"temperatura\n"  # Envia o comando para ativar o LCD
-        elif opcao == "sair":
-            print("Encerrando programa.")
-            break
+            msg = b"temperatura\n"
         else:
-            print("Opção inválida! Programa encerrado.")
-            break
+            # Qualquer outro texto será mostrado no LCD
+            msg = opcao.encode() + b"\n"
 
         s = None
         for tentativa in range(1, MAX_TENTATIVAS + 1):
             try:
-                print(f"Tentando abrir conexão com IP: {HOST[ip - 1]} (tentativa {tentativa})")
+                print(f"\nTentando conexão com IP: {HOST[ip - 1]} (tentativa {tentativa})")
                 s = socket.create_connection((HOST[ip - 1], PORT), timeout=2)
                 print("Conexão aberta.")
                 s.settimeout(TIMEOUT)
                 s.sendall(msg)
-                resposta = s.recv(128).decode().strip()  # aumentamos o buffer
-                print(f"Comando executado. Resposta: {resposta}")
-                break
+
+                try:
+                    resposta = s.recv(128).decode().strip()
+                    print(f"Resposta: {resposta}")
+                except socket.timeout:
+                    print("Tempo esgotado esperando resposta do Arduino.")
+
+                break  # conexão bem-sucedida, sai do loop
 
             except socket.timeout:
                 print(f"Tempo esgotado (tentativa {tentativa}/{MAX_TENTATIVAS}).")
